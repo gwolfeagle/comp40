@@ -1,0 +1,119 @@
+HW2 DESIGN DOCUMENT -
+George Aquia
+Matthew Coke
+
+Design Checklist for UArray2
+-----------------------------
+
+What is the abstract thing you are trying to represent?
+-A two-dimensional unboxed array of a given width and height, and with elements of a given size.
+
+What functions will you offer, and what are the contracts of that those functions must meet?
+-UArray2_T Uarray2_new(int width, int height, int size) - Creates a new, empty two-dimensional array. Takes the parameters of height and width of the 		array, and the corresponding size in bytes of each element.
+
+-int Uarray2_width(UArray2_T arr) - Returns the width of the two-dimensional array. 
+-int Uarray2_height(UArray2_T arr) - Returns the height of the two-dimensional array.
+-int Uarray2_size(UArray2_T arr) - Returns the number of elements in the two-dimensional array.
+-void *Uarray2_at(UArray2_T arr, int x, int y) - Returns the element at the location specified in the two-dimensional array.
+
+-void Uarray2_map_col_major(UArray2_T arr, apply(int row, int col, void *element, void *cl), void *cl) - Interprets the two-dimensional array in 	column-major order and maps the elements stored in the two-dimensional array to a one-dimensional array.
+-void Uarray2_map_row_major(UArray2_T arr, apply(int row, int col, void *element, void *cl), void *cl) - Interprets the two-dimensional array in 	row-major order and maps the elements stored in the two-dimensional array to a one-dimensional array.
+
+-int Uarray2_put(UArray2_T arr, int x, int y, void * data) - Adds data to an element in the two-dimensional array at the given index coordinates x,y.
+-void Uarray2_free(UArray2_T arr) - Removes a two-dimensional array from memory.
+
+What examples do you have of what the functions are supposed to do?
+-The UArray2_new function is a creator, and thus creates a Uarray2 type with dimensions width and height
+-The UArray2_free function is a destroyer, and so will free the allocated memory
+-The UArray2_map functions takes an image and change the form of the data structure to an array, making iteration through and make functional changes 		to the elements within the array.
+-The UArrray2_put function will take any data type that can fit into the given "size" of the elements and add it to the array at the given 		coordinates.
+
+Here's an example sequence:
+uarray2 arr = UArray2_new(10, 10, 4); //Creates a 10 by 10 two dimensional Uarray that stores data of size 4 bytes, in this case ints.
+Uarray2_put(arr, 0, 0, p); //Gives the index 0,0 the value p
+Uarray2_put(arr, 2, 3, p); //Gives the index 2,3 the value p
+...
+w = Uarray2_width(arr); //Gives w the width of the array
+h = Uarray2_height(arr); //Gives h the height of the array
+Uarray2_free(arr); //Frees all allocated heap memory
+
+What representation will you use, and what invariants will it satisfy?
+-Representation will be a two dimensional UArray2_T using a normal array of length "width" with each element of that array pointing to a UArray_T 	that has a length of given "height". 
+Invariants:
+-That the number of elements in the UArray2_T never exceeds the capacity of the UArray2_T
+-The size of those elements never exceed the "size" that the UArrays are made with.
+-An empty data type will be simply a pointer to NULL
+
+
+When a representation satisfies all invariants, what abstract thing does it represent?
+-A two-dimensional array made up of unboxed elements of given height and given width
+-Null if the 2D array is empty
+
+
+What test cases have you devised?
+-Reading with UArray2_map_col_major and writing with UArray2_map_row_major is done to duplicate pnmflip-transpose.
+-Reading a graymap image and comparing it with diff -bu, available through the pnmrdr interface.
+-The entire interface is tested by a program used to identify valid Sudoku solutions.
+-Using the UArray2 to hold a graymap image of given size
+
+What programming idioms will you need?
+-The idioms for allocating and initializing pointers to structures.
+-The idioms for using unboxed arrays.
+-The idioms for using void * pointers.
+
+
+Design checklist for Bit2
+--------------------------
+
+What is the abstract thing you are trying to represent?
+-A two-dimensional array of bits.
+
+What functions will you offer, and what are the contracts of that those functions must meet?
+-Bit2_T Bit2_new(int width, int height) - Creates a new, empty 2 dimensional bit array
+-int Bit_Width(Bit2_T bit2) - Returns the width of the bit array
+-int Bit_Height(Bit2_T bit2) - Returns the height of the bit array
+-int Bit_size(Bit2_T bit2) - Returns the total number of bits in the array 
+
+-int Bit_get(Bit2_T bit2, int x, int y) - Returns the bit value from a given bit in the array.
+-int Bit_put(Bit2_T bit2, int x, int y, int bit) - Adds a bit of a given value to 2D array at given coordinates, and returns the value of that bit.
+
+-void Bit2_map_col_major(Bit2_T bit2, apply(int row, int col, void * element, void *cl), void *cl)- Interprets the two-dimensional array of bits in 	column-major order and maps the elements stored in the two-dimensional array to a one-dimensional array.
+-void Bit2_map_row_major(Bit2_T bit2, apply(int row, int col, void * element, void *cl), void *cl)- Interprets the two-dimensional array of bits in 	row-major order and maps the elements stored in the two-dimensional array to a one-dimensional array.
+
+-void Bit2_free(Bit2_T bit2) - Frees allocated heap memory.
+
+What examples do you have of what the functions are supposed to do?
+-The Bit2_new function is a creator and thus will allocate memory and create the 2 dimensional array of bits.
+-The Bit2_free function is a destroyer, and so will free all allocated heap memory.
+-The Bit2_map functions take an image and change the form of the data structure to an 1D array, making iteration through and making functional 		changes to the elements in the array easier.
+-The Bit2_put function will take a bit of value 0 or 1 and add it to the array at the given coordinates.
+
+What representation will you use, and what invariants will it satisfy?
+-I will use an array of given width in which each element holds a bit vector of given length "height". This will represent a two dimensional array of 		bits.
+Invariants: 
+-The number of bits held in the two dimensional array will never exceed the number of total elements in the 2D bit array.
+-A Bit2 array with no elements is Null.
+-Given values of bits will always be either 0 or 1.
+
+When a representation satisfies all invariants, what abstract thing does it represent?
+-It will represent a 2 dimensional array of bits of given width and height, which can have values of either 0 or 1.
+
+What test cases have you devised?
+-A binary black and white image that can be loaded bit by bit into the 2D array
+-A seqeuence of bit flips that can be loaded into the 2D array to represent binary numbers being placed into the array.
+
+Here's an example sequence:
+Bit2_T bit2 = Bit2_new(100, 100); //Creates a 100 by 100 two dimensional bit vector that stores bit data of size 0 or 1.
+Bit2_put(bit2, 0, 0, 1); //Gives the index 0,0 the value 1
+Bit2_put(bit2, 0, 1, 0); //Gives the index 0,1 the value 0
+...
+w = Bit2_get(bit2, 0, 0); //Will give w the value at 0,0, in this case 0
+h = Bit2_height(bit2); //Gives h the height of the array
+Bit2_free(bit2); //Frees all allocated heap memory
+
+What programming idioms will you need?
+-The idioms for allocating and initializing pointers to structures
+-The idioms for allocating memory
+-The idioms for dealing with bits as a data type.
+
+  

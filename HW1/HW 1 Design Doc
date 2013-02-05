@@ -1,0 +1,17 @@
+Homework #1 Design Document for Part B
+Brian Cefali
+George Aquila
+
+The data structures implemented will be Table and List. The Table's void* key
+will always point to a char* of an Atomized fingerprint. The Table's void* value
+will always point to a List. Each List in the Table will
+contain a list of char*s that represent Atomized names for each fingerprint.
+
+The first invariant is that every fingerprint which has been processed is
+already Atomized as a key in the Table. The second invariant is that every
+name which has been processed has been added into the List of names paired
+with its corresponding fingerprint.
+
+Fingerprint groups are computed by looping through the Table by converting it
+to an array, and for each List with a length of at least 2, all names in that
+list are printed as a group.

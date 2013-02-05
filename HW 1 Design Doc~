@@ -1,0 +1,25 @@
+F-Groups
+
+DataStructures:
+-Associated table to hash each fingerprint
+
+In the table, each key will be a fingerprint; each associated value will be a linked list which stores all names that share that fingerprint
+
+Invariant: Partway through reading lines, all names that share the same fingerprint are contained in the same linked list
+
+Functions:
+
+1. Read in all data, deal with bad input
+	-Read in fingerprint, check for bad fingerprint
+		-Everything until the first whitespace is the fingerprint
+		-First non-whitespace character begins the name and ends at a new line character
+	-Add associated name to list at the corresponding table cell
+2. Prune and print and delete
+	-Loop through table start to finish
+		-If cell is Null, skip
+		-If list contains one name, delete cell and skip
+		-If list contains more than one name print the whole list in specified output
+		-Delete cell if not already
+3. Clean up memory
+	-Delete table structure
+
