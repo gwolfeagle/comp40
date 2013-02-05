@@ -3,7 +3,6 @@
 #include <uarray2.h>
 #include <pnmrdr.h>
 
-//FUUUUUUUUUUUUUUUUUUUUUUUUUUUCK
 static const int SUBSETSIZE = 9;
 
 extern void readInput(UArray2_T, int, int, void *, void *);
