@@ -46,12 +46,15 @@ FILE *get_file(int argc, char** argv)
         else if(argc == 2){
                 fp = fopen(argv[1], "r");
                 if(fp == NULL){
-                        fprintf(stderr, "%s: Could not open file %s for reading", argv[0], argv[1]);
+                        fprintf(stderr, 
+                                "%s: Could not open file %s for reading",
+                                argv[0], argv[1]);
                         exit(1);
                 }
         }
         else{
-                fprintf(stderr, "Too many arguments provided in addition to %s", argv[1]);
+                fprintf(stderr, 
+                "Too many arguments provided in addition to %s", argv[1]);
                 exit(1);
         }
         return fp;    

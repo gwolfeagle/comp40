@@ -5,18 +5,33 @@
 
 static const int SUBSETSIZE = 9;
 
+extern FILE* get_file(int, char**);
 extern void readInput(UArray2_T, int, int, void *, void *);
 extern int unique_Subset(UArray2_T, int *, int, int, int, int); 
 extern int solution_Valid(UArray2_T);
+void pgmwrite(FILE *, UArray2_T);
 
 int main (int argc, char* argv[])
 {
-         printf("Starting program\n");
-        UArray2_T solution;
-        Pnmrdr_T bitmapRdr;
-        Pnmrdr_T *bitmapPtr;
-        FILE *fp = NULL;
+        printf("Starting program\n");
+        UArray2_T solution = NULL;
+        FILE *fp = get_file(argc, argv);
+        pgmwrite(fp, solution);
+        
+        if(solution_Valid(solution)){
+                printf("Solution good\n");
+                return 0;
+        }
 
+        else {
+                printf("solution did not work\n");
+                return 1;
+        }
+}
+
+FILE* get_file(int argc, char** argv)
+{
+        FILE* fp = NULL;
         if(argc == 1){
                 fp = stdin;
                 printf("One arg provided\n");
@@ -32,39 +47,33 @@ int main (int argc, char* argv[])
                 }
                  printf("Two args provided\n");
         } else{
-                fprintf(stderr, "Error: too many files provided beyond %s\n", argv[1]);
+                fprintf(stderr, 
+                "Error: too many files provided beyond %s\n", argv[1]);
                 exit(1);
         }
-                
-                bitmapRdr = Pnmrdr_new(fp);
-                /*if(Pnmrdr_Badformat){
-                        fprintf(stderr, "Error: Bad format\n");
-                        exit(1);
-                }*/
-                bitmapPtr = &bitmapRdr;
-                Pnmrdr_mapdata bitmapData = Pnmrdr_data(bitmapRdr);
-                printf("Checking bitmap data\n");
-                //test denominator and if greater than 9x9
-                if(bitmapData.denominator > 9)
-                        exit(1);
-                if(bitmapData.height > 9 || bitmapData.width > 9)
-                        exit(1);
-                
-                printf("Assigning solution\n");
-                solution = Uarray2_new(bitmapData.height, bitmapData.width, sizeof(int));
-                Uarray2_map_row_major(solution, readInput, bitmapRdr);//(bitmapPtr, solution, NULL)
-                printf("Uarray2 made and loaded\n");
-                
-        Pnmrdr_free(bitmapPtr);
-        if(solution_Valid(solution)){
-                printf("Solution good\n");
-                return 0;
-        }
+        return fp;
+}
 
-        else {
-                printf("solution did not work\n");
-                return 1;
-        }
+void pgmwrite(FILE* fp, UArray2_T solution)
+{
+        Pnmrdr_T bitmapRdr;
+        Pnmrdr_T *bitmapPtr;
+        bitmapRdr = Pnmrdr_new(fp);
+
+        bitmapPtr = &bitmapRdr;
+        Pnmrdr_mapdata bitmapData = Pnmrdr_data(bitmapRdr);
+        printf("Checking bitmap data\n");
+        //test denominator and if greater than 9x9
+        if(bitmapData.denominator > 9)
+                exit(1);
+        if(bitmapData.height > 9 || bitmapData.width > 9)
+                exit(1);
+        
+        printf("Assigning solution\n");
+        solution = Uarray2_new(bitmapData.height, bitmapData.width, sizeof(int));
+        Uarray2_map_row_major(solution, readInput, bitmapRdr);//(bitmapPtr, solution, NULL)
+        printf("Uarray2 made and loaded\n");
+        Pnmrdr_free(bitmapPtr);
 }
 
 void readInput(UArray2_T solution, int i, int j, void *pos, void *cl)
