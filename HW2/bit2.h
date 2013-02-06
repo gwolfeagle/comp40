@@ -14,13 +14,13 @@ extern int Bit2_get(T bit2, int x, int y); //observer
 
 extern int Bit2_put(T bit2, int x, int y, int bit); //mutator
 extern void Bit2_map_col_major(T bit2, 
-                        int apply(int value, void *cl), 
+                void (*apply)(T bit2, int i, int j, int bitval, void *cl), 
                         void *cl); //mutator
 extern void Bit2_map_row_major(T bit2,
-                        int apply(int value, void *cl), 
+                void (*apply)(T bit2, int i, int j, int bitval, void *cl),
                         void *cl); //mutator
 
-extern void Bit2_free(T bit2, int width); //destroyer
+extern void Bit2_free(T bit2); //destroyer
 
 #undef T
 #endif

@@ -48,22 +48,20 @@ void *Uarray2_at(T arr, int xcor, int ycor){
         return UArray_at((arr->uarrs[xcor]), ycor);
 }
 
-/*
-void *Uarray2_put(T arr, int xcor, int ycor, void *data){
-        *(Uarray2_at(arr, xcor, ycor)) = data;
-}
-*/
-void Uarray2_map_row_major(T arr, void (*apply)(T arr, int i, int j, void *value, void *cl), void *cl){
-
+void Uarray2_map_row_major(T arr, void (*apply)(T arr, int i, 
+                                int j, void *value, void *cl), void *cl)
+{
         for(int i = 0; i < arr->height; i++){
                 for(int j = 0; j < arr->width; j++){
                         void *p = Uarray2_at(arr, j, i);
-                        apply(arr, i, j, p, cl);
+                        apply(arr, j, i, p, cl);
                 }
         }
 }
 
-void Uarray2_map_col_major(T arr, void (*apply)(T arr, int i, int j, void *value, void *cl), void *cl){
+void Uarray2_map_col_major(T arr, void (*apply)(T arr, int i, 
+                                int j, void *value, void *cl), void *cl)
+{
 
         for(int i = 0; i < arr->width; i++){
                 for(int j = 0; j < arr->height; j++){

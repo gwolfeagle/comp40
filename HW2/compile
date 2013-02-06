@@ -13,7 +13,7 @@ case $1 in
 esac
 
 # use 'gcc' as the C compiler (at home, you could try 'clang')
-CC=gcc
+CC=clang
 
 # the next two lines enable you to compile and link against CII40
 CIIFLAGS=`pkg-config --cflags cii40`

@@ -13,10 +13,10 @@ extern int Uarray2_size(T arr); //observer
 extern void *Uarray2_at(T arr, int x, int y); //observer
 
 extern void Uarray2_map_col_major(T arr, 
-                        void (*apply)(T arr, int i, int j,void *value, void *cl),
+                void (*apply)(T arr, int i, int j,void *value, void *cl),
                         void *cl); //morpher
 extern void Uarray2_map_row_major(T arr,
-                        void (*apply)(T arr, int i, int j, void *value, void *cl),
+                void (*apply)(T arr, int i, int j, void *value, void *cl),
                         void *cl); //morpher
                         
 //extern void *Uarray2_put(T arr, int x, int y, void * data); //morpher
