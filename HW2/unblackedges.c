@@ -11,13 +11,13 @@ typedef struct{
         int x, y;
 }coordinates;
 
-extern FILE *get_file(int, char**);
-extern Bit2_T pbmwrite(FILE *, Bit2_T);
-extern void buildEdgeSet(Bit2_T, Seq_T);
-extern void identifyBlackEdgePixel(Bit2_T, Seq_T, int x, int y);
-extern void processEdgePixels(Bit2_T, Seq_T);
-extern void addEdgeNeighbors(Bit2_T, Seq_T, coordinates*);
-extern void printBitmap(Bit2_T, int, int, int, void *);
+FILE *get_file(int, char**);
+Bit2_T pbm_to_bit2(FILE *);
+void buildEdgeSet(Bit2_T, Seq_T);
+void identifyBlackEdgePixel(Bit2_T, Seq_T, int x, int y);
+void processEdgePixels(Bit2_T, Seq_T);
+void addEdgeNeighbors(Bit2_T, Seq_T, coordinates*);
+void printBitmap(Bit2_T, int, int, int, void *);
 
 int main(int argc, char* argv[])
 {
@@ -25,14 +25,14 @@ int main(int argc, char* argv[])
         Seq_T edgePixels = Seq_new(0);
 
         Bit2_T bitmap = NULL;
-        bitmap = pbmwrite(fp, bitmap);
+        bitmap = pbm_to_bit2(fp);
         buildEdgeSet(bitmap, edgePixels);
        
         processEdgePixels(bitmap, edgePixels);
         Seq_free(&edgePixels);
         fprintf(stdout, "P1 %d %d ", Bit2_width(bitmap), Bit2_height(bitmap));
         Bit2_map_row_major(bitmap, printBitmap, NULL);
-        Bit2_free(bitmap);// Bit2_width(bitmap));
+        Bit2_free(bitmap);
 
 }
 
@@ -59,11 +59,11 @@ FILE *get_file(int argc, char** argv)
         return fp;    
 }
 
-Bit2_T pbmwrite(FILE *fp, Bit2_T bitmap)
+Bit2_T pbm_to_bit2(FILE *fp)
 {
-        Pnmrdr_T bitmapRdr = Pnmrdr_new(fp);
+        Pnmrdr_T bitmapRdr = Pnmrdr_new(fp); //Makes Pnm reader; Loads file
         Pnmrdr_mapdata bitmapData = Pnmrdr_data(bitmapRdr);
-        bitmap = Bit2_new(bitmapData.width, bitmapData.height);
+        Bit2_T bitmap = Bit2_new(bitmapData.width, bitmapData.height);
         unsigned int val = 0;
                 
         for(unsigned int i = 0; i < bitmapData.height; i++){
@@ -78,24 +78,25 @@ Bit2_T pbmwrite(FILE *fp, Bit2_T bitmap)
 
 void printBitmap(Bit2_T bitmap, int x, int y, int bitval, void * cl)
 {
-        (void) bitmap;
-        (void) x;
-        (void) y;
-        (void) cl;
+        (void) bitmap; (void) x; (void) y; (void) cl;
         fprintf(stdout, "%d", bitval);
 } 
 
 void buildEdgeSet(Bit2_T bitmap, Seq_T edgePixels)
 {
+        //Iterates down the two edge columns
         for(int i = 0; i < Bit2_height(bitmap); i++){
                 int index = i;
                 identifyBlackEdgePixel(bitmap, edgePixels, 0, index);
-                identifyBlackEdgePixel(bitmap, edgePixels, Bit2_width(bitmap) - 1, index);
+                identifyBlackEdgePixel(bitmap, edgePixels, 
+                                       Bit2_width(bitmap) - 1, index);
         }
+        //Iterates across the two edge rows
         for(int i = 1; i < Bit2_width(bitmap) - 1; i++){
                 int index = i;
                 identifyBlackEdgePixel(bitmap, edgePixels, index, 0);
-                identifyBlackEdgePixel(bitmap, edgePixels, index, Bit2_height(bitmap) - 1);
+                identifyBlackEdgePixel(bitmap, edgePixels, index, 
+                                       Bit2_height(bitmap) - 1);
         }
 }
 
@@ -116,49 +117,58 @@ void processEdgePixels(Bit2_T bitmap, Seq_T edgePixels)
 {
         while(Seq_length(edgePixels) > 0){
 
-                coordinates* currPixel = (coordinates*)Seq_remlo(edgePixels);
+                coordinates* currPixel = Seq_remlo(edgePixels);
+                //Checks if pixel is already white to avoid duplicates
+                if(Bit2_get(bitmap, currPixel->x, currPixel->y) == 0){
+                        free(currPixel);
+                        continue;
+                }
                 addEdgeNeighbors(bitmap, edgePixels, currPixel);
                 Bit2_put(bitmap, currPixel->x, currPixel->y, 0);
+                free(currPixel);
         }
 }
 
 void addEdgeNeighbors(Bit2_T bitmap, Seq_T edgePixels, coordinates* currPixel)
 {
-        if(Bit2_get(bitmap, currPixel->x, currPixel->y) == 0)
-                return;
-                
-        coordinates* neighborPixel = malloc(sizeof(coordinates));
-        
         if(currPixel->x < Bit2_width(bitmap) - 1){ //Checks right
-                neighborPixel->x = currPixel->x + 1; 
-                neighborPixel->y = currPixel->y;
-        
-                if(Bit2_get(bitmap, neighborPixel->x, neighborPixel->y))
+                if(Bit2_get(bitmap, currPixel->x + 1, currPixel->y)){
+                        coordinates* neighborPixel = 
+                                malloc(sizeof(*neighborPixel));
+                        neighborPixel->x = currPixel->x + 1; 
+                        neighborPixel->y = currPixel->y;
                         Seq_addlo(edgePixels, neighborPixel);
+                }
         }
            
         if(currPixel->x > 0){ //Check left
-                neighborPixel->x = currPixel->x - 1; 
-                neighborPixel->y = currPixel->y;
-                
-                if(Bit2_get(bitmap, neighborPixel->x, neighborPixel->y))
+                if(Bit2_get(bitmap, currPixel->x - 1, currPixel->y)){
+                        coordinates* neighborPixel = 
+                                malloc(sizeof(*neighborPixel));
+                        neighborPixel->x = currPixel->x - 1; 
+                        neighborPixel->y = currPixel->y;
                         Seq_addlo(edgePixels, neighborPixel);
+                }
         }
         
         if(currPixel->y < Bit2_height(bitmap) - 1){ //Checks up
-                neighborPixel->x = currPixel->x; 
-                neighborPixel->y = currPixel->y + 1;
-                
-                if(Bit2_get(bitmap, neighborPixel->x, neighborPixel->y))
+                if(Bit2_get(bitmap, currPixel->x, currPixel->y + 1)){
+                        coordinates* neighborPixel = 
+                                malloc(sizeof(*neighborPixel));
+                        neighborPixel->x = currPixel->x; 
+                        neighborPixel->y = currPixel->y + 1;
                         Seq_addlo(edgePixels, neighborPixel);
+                }
         }
                        
         if(currPixel->y > 0){ //Checks down
-                neighborPixel->x = currPixel->x; 
-                neighborPixel->y = currPixel->y-1;
-                
-                if(Bit2_get(bitmap, neighborPixel->x, neighborPixel->y))
-                        Seq_addlo(edgePixels, neighborPixel);                
+                if(Bit2_get(bitmap, currPixel->x, currPixel->y - 1)){
+                        coordinates* neighborPixel = 
+                                malloc(sizeof(*neighborPixel));
+                        neighborPixel->x = currPixel->x; 
+                        neighborPixel->y = currPixel->y-1;
+                        Seq_addlo(edgePixels, neighborPixel); 
+                }               
         }          
 }
 

@@ -12,18 +12,18 @@ struct T
 
 T Bit2_new(int width, int height)
 {
-	T bit2 = malloc(sizeof(struct T)); 
+        T bit2 = malloc(sizeof(struct T)); 
         bit2->width = width;
         bit2->height = height;
-		
+                
         if(width > 0){
-		bit2->bitVects = calloc(width, sizeof(Bit_T));
-		for(int i = 0; i <  width; i++)
-			bit2->bitVects[i] = Bit_new(height);
-	}
-	else bit2->bitVects = NULL;
+                bit2->bitVects = calloc(width, sizeof(Bit_T));
+                for(int i = 0; i <  width; i++)
+                        bit2->bitVects[i] = Bit_new(height);
+        }
+        else bit2->bitVects = NULL;
         
-        return bit2;	       
+        return bit2;           
 }
 
 int Bit2_width(T bit2)
@@ -31,7 +31,8 @@ int Bit2_width(T bit2)
         return bit2->width;    
 }
 
-int Bit2_height(T bit2){
+int Bit2_height(T bit2)
+{
         return bit2->height;
 }
 
@@ -46,7 +47,8 @@ int Bit2_put(T bit2, int xcor, int ycor, int value)
         return value;
 }
 
-void Bit2_map_row_major(T bit2, void (*apply)(T bit2, int i, int j, int bitval, void*cl), void *cl)
+void Bit2_map_row_major(T bit2, void (*apply)(T bit2, int i, int j, 
+                                              int bitval, void*cl), void *cl)
 {
         for(int i = 0; i < bit2->height; i++){
                 for(int j =0; j < bit2->width; j++){
@@ -56,7 +58,8 @@ void Bit2_map_row_major(T bit2, void (*apply)(T bit2, int i, int j, int bitval, 
         }
 }
 
-void Bit2_map_col_major(T bit2, void (*apply)(T bit2, int i, int j, int bitval, void*cl), void *cl)
+void Bit2_map_col_major(T bit2, void (*apply)(T bit2, int i, int j, 
+                                              int bitval, void*cl), void *cl)
 {
         for(int i = 0; i < bit2->width; i++){
                 for(int j = 0; j < bit2->height; j++){
@@ -72,6 +75,7 @@ void Bit2_free(T bit2)
                 Bit_T * bitVectsPtr = &(bit2->bitVects[i]);
                 Bit_free(bitVectsPtr);
         }
+        free(bit2->bitVects);
         free(bit2);
 }
 

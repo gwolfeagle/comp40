@@ -6,29 +6,23 @@
 
 static const int SUBSETSIZE = 9;
 
-extern FILE* get_file(int, char**);
-extern void readInput(UArray2_T, int, int, void *, void *);
-extern int unique_Subset(UArray2_T, int *, int, int, int, int); 
-extern int solution_Valid(UArray2_T);
-extern UArray2_T pgmwrite(FILE *, UArray2_T);
+FILE* get_file(int, char**);
+void readInput(UArray2_T, int, int, void *, void *);
+int unique_Subset(UArray2_T, int *, int, int, int, int); 
+int solution_Valid(UArray2_T);
+UArray2_T pgm_to_Uarray2(FILE *);
 
 int main (int argc, char* argv[])
 {
         UArray2_T solution = NULL;
         FILE *fp = get_file(argc, argv);
-        assert(fp);
-        solution = pgmwrite(fp, solution);
+        solution = pgm_to_Uarray2(fp);
         
-        if(solution_Valid(solution)){
-                printf("return 0 good\n");
-                
+        if(solution_Valid(solution))
                 return 0;
-        }
 
-        else {
-                printf("return 1 bad\n");
+        else
                 return 1;
-        }
 }
 
 FILE* get_file(int argc, char** argv)
@@ -54,13 +48,11 @@ FILE* get_file(int argc, char** argv)
         return fp;
 }
 
-UArray2_T pgmwrite(FILE* fp, UArray2_T solution)
+UArray2_T pgm_to_Uarray2(FILE* fp)//, UArray2_T solution)
 {
-        Pnmrdr_T bitmapRdr;
-        Pnmrdr_T *bitmapPtr;
-        bitmapRdr = Pnmrdr_new(fp);
+        Pnmrdr_T bitmapRdr; //Creates Pnm reader; Loads file
+        bitmapRdr = Pnmrdr_new(fp); 
 
-        bitmapPtr = &bitmapRdr;
         Pnmrdr_mapdata bitmapData = Pnmrdr_data(bitmapRdr);
         //test denominator and if greater than 9x9
         if(bitmapData.denominator > 9)
@@ -68,9 +60,10 @@ UArray2_T pgmwrite(FILE* fp, UArray2_T solution)
         if(bitmapData.height > 9 || bitmapData.width > 9)
                 exit(1);
         
-        solution = Uarray2_new(bitmapData.width, bitmapData.height, sizeof(int));
+        UArray2_T solution = Uarray2_new(bitmapData.width, bitmapData.height,
+                                        sizeof(int));
         Uarray2_map_row_major(solution, readInput, bitmapRdr);
-        Pnmrdr_free(bitmapPtr);
+        Pnmrdr_free(&bitmapRdr);
         return solution;
 }
 
@@ -81,6 +74,10 @@ void readInput(UArray2_T solution, int i, int j, void *pos, void *cl)
         (void) solution; 
         Pnmrdr_T bitmapRdr = cl;
         unsigned int val = Pnmrdr_get(bitmapRdr);
+        if(val < 1 || val > 9){ //Checks for invalid values
+                fprintf(stderr, "Error: Given non-Sudoku value\n");
+                exit(1);
+        }
         unsigned int* p = pos;
         *p = val;
 }
@@ -100,7 +97,8 @@ int solution_Valid(UArray2_T solution)
         int highCol = width;
 
         while(valid && highRow <= height){
-                valid = unique_Subset(solution, subset, lowRow, highRow, lowCol, highCol);
+                valid = unique_Subset(solution, subset, lowRow, highRow, 
+                                      lowCol, highCol);
                 for(int i = 0; i < SUBSETSIZE; i++)
                         memset(&subset[i], 0, sizeof(int));                
                 lowRow++;
@@ -113,7 +111,8 @@ int solution_Valid(UArray2_T solution)
         highCol = 1;
 
         while(valid && highCol <= width){
-                valid = unique_Subset(solution, subset, lowRow, highRow, lowCol, highCol);
+                valid = unique_Subset(solution, subset, lowRow, highRow,
+                                      lowCol, highCol);
                 for(int i = 0; i < SUBSETSIZE; i++)
                         memset(&subset[i], 0, sizeof(int));  
                         
@@ -128,7 +127,8 @@ int solution_Valid(UArray2_T solution)
                 lowRow = 0;
                 highRow = 3; 
                 while(valid && highRow <= height){
-                        valid = unique_Subset(solution, subset, lowRow, highRow, lowCol, highCol);
+                        valid = unique_Subset(solution, subset, lowRow,
+                                              highRow, lowCol, highCol);
                         for(int i = 0; i < SUBSETSIZE; i++)
                                 memset(&subset[i], 0, sizeof(int));
                         lowRow = lowRow+3;
@@ -144,12 +144,14 @@ int solution_Valid(UArray2_T solution)
         return valid;
 }
 
-int unique_Subset(UArray2_T source, int *subset, int lowRow, int hiRow, int lowCol, int hiCol)
+int unique_Subset(UArray2_T source, int *subset, int lowRow, int hiRow, 
+                  int lowCol, int hiCol)
 {
+        //Uses the subset array to check if repetitions occur
         for(int currRow = lowRow; currRow < hiRow; currRow++){
                 for(int currCol = lowCol; currCol < hiCol; currCol++){
-                        int val = *((int*)Uarray2_at(source, currRow, currCol)); //beware
-                        printf("value of val: %d \n", val);
+                        int val = *((int*)Uarray2_at(source, currRow,
+                                    currCol));
                         if (subset[val - 1] > 0)
                                 return 0;
                         
